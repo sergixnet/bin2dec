@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -54,21 +55,33 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormComponent implements OnInit {
-  converterForm = new FormGroup({
-    binary: new FormControl('', Validators.pattern(/^[0+1+]+$/gm)),
-    decimal: new FormControl(''),
-  });
+  converterForm!: FormGroup;
+  private binarySubscription: Subscription | undefined;
 
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.converterForm = new FormGroup({
+      binary: new FormControl('', [Validators.required]),
+      decimal: new FormControl(''),
+    });
 
-  onConvert() {
-    if (this.converterForm.invalid) {
-      return;
-    }
+    this.binarySubscription = this.binary?.valueChanges.subscribe((value) => {
+      const binaryValue = value.replace(/[^10]+/g, '');
+      this.binary?.setValue(binaryValue);
+    });
+  }
 
-    const binaryValue = this.converterForm.get('binary')?.value;
+  get binary() {
+    return this.converterForm.get('binary');
+  }
+
+  ngOnDestroy(): void {
+    this.binarySubscription?.unsubscribe();
+  }
+
+  onConvert(): void {
+    const binaryValue = this.binary?.value;
     const decimalValue = parseInt(binaryValue!, 2);
 
     this.converterForm.get('decimal')?.setValue(`${decimalValue}`);
