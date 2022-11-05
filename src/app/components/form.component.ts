@@ -45,12 +45,16 @@ type Origin = 'binary' | 'decimal';
           </div>
           <div class="w-full md:w-full px-3 mb-6">
             <button
+              [disabled]="!canConvert()"
               (click)="onConvert()"
               class="appearance-none block w-full bg-blue-600 text-gray-100 font-bold border border-gray-200 rounded-lg py-3 px-3 leading-tight hover:bg-blue-500 focus:outline-none focus:bg-white focus:border-gray-500 focus:text-pink-700"
             >
               Convert!
             </button>
           </div>
+          <p *ngIf="!canConvert()" class="text-center text-red-500 w-full">
+            You must enter some value!
+          </p>
         </div>
       </form>
     </div>
@@ -67,8 +71,8 @@ export class FormComponent implements OnInit {
 
   ngOnInit(): void {
     this.converterForm = new FormGroup({
-      binary: new FormControl('', [Validators.required]),
-      decimal: new FormControl(0),
+      binary: new FormControl(0, [Validators.required]),
+      decimal: new FormControl(0, [Validators.required]),
     });
 
     this.binarySubscription = this.binary?.valueChanges.subscribe((value) => {
@@ -101,5 +105,9 @@ export class FormComponent implements OnInit {
 
   updateOrigin(origin: Origin) {
     this.origin = origin;
+  }
+
+  canConvert(): boolean {
+    return this.binary!?.valid || this.decimal!?.valid;
   }
 }
