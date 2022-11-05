@@ -7,9 +7,6 @@ type Origin = 'binary' | 'decimal';
 @Component({
   selector: 'app-form',
   template: `
-    <div class="text-center mt-7">
-      <h2 class="text-4xl tracking-tight">Binary to Decimal converter</h2>
-    </div>
     <div class="flex justify-center my-2 mx-4 md:mx-0">
       <form
         [formGroup]="converterForm"
