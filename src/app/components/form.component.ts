@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Origin } from '../models';
 import { ConverterService } from '../services/converter.service';
 
-type Origin = 'binary' | 'decimal';
 @Component({
   selector: 'app-form',
   template: `
@@ -14,31 +13,20 @@ type Origin = 'binary' | 'decimal';
       >
         <div class="flex flex-wrap -mx-3 mb-6">
           <div class="w-full md:w-full px-3 mb-6">
-            <label
-              class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-              for="binary"
-              >Binary</label
-            >
-            <input
-              id="binary"
+            <app-form-control
+              label="Binary"
               formControlName="binary"
-              class="appearance-none block w-full bg-white text-gray-900 font-medium border border-gray-400 rounded-lg py-3 px-3 leading-tight focus:outline-none"
-              type="text"
+              numberType="binary"
               (input)="updateOrigin('binary')"
-            />
+            ></app-form-control>
           </div>
           <div class="w-full md:w-full px-3 mb-6">
-            <label
-              class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-              for="decimal"
-              >Decimal</label
-            >
-            <input
+            <app-form-control
+              label="Decimal"
               formControlName="decimal"
-              class="appearance-none block w-full bg-white text-gray-900 font-medium border border-gray-400 rounded-lg py-3 px-3 leading-tight focus:outline-none"
-              type="number"
+              numberType="decimal"
               (input)="updateOrigin('decimal')"
-            />
+            ></app-form-control>
           </div>
           <div class="w-full md:w-full px-3 mb-6">
             <button
@@ -61,20 +49,14 @@ type Origin = 'binary' | 'decimal';
 })
 export class FormComponent implements OnInit {
   converterForm!: FormGroup;
-  private binarySubscription: Subscription | undefined;
   private origin: Origin = 'binary';
 
   constructor(private converter: ConverterService) {}
 
   ngOnInit(): void {
     this.converterForm = new FormGroup({
-      binary: new FormControl(0, [Validators.required]),
-      decimal: new FormControl(0, [Validators.required]),
-    });
-
-    this.binarySubscription = this.binary?.valueChanges.subscribe((value) => {
-      const binaryValue = value.replace(/[^10]/g, '');
-      this.binary?.setValue(binaryValue, { emitEvent: false });
+      binary: new FormControl('0', [Validators.required]),
+      decimal: new FormControl('0', [Validators.required]),
     });
   }
 
@@ -84,10 +66,6 @@ export class FormComponent implements OnInit {
 
   get decimal() {
     return this.converterForm.get('decimal');
-  }
-
-  ngOnDestroy(): void {
-    this.binarySubscription?.unsubscribe();
   }
 
   onConvert(): void {
